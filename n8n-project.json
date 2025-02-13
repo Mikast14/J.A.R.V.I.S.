@@ -1,0 +1,744 @@
+{
+  "name": "Mika project",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6b83d179-af1a-4079-80ab-48456f779045",
+                    "leftValue": "={{ $json.message.text || \"\"}}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6e1ccfb2-95f1-4e19-9742-20ca773a33a0",
+                    "leftValue": "error",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Error"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        260,
+        0
+      ],
+      "id": "b6590482-c973-4182-9fc5-87e979610d5b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        500,
+        -220
+      ],
+      "id": "ab0476e0-661c-4de5-8cd0-5890b0756c0a",
+      "name": "Telegram",
+      "webhookId": "12fd4a94-1554-4a9d-a6af-2fb1646a87cf",
+      "credentials": {
+        "telegramApi": {
+          "id": "KxuLoQ1mhe2bQMcZ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.assemblyai.com/v2/transcript",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "429dc6ef0bf645c6baaa8fb5d577e79b"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"audio_url\": \"{{ $json.upload_url }}\",\n  \"language_code\": \"nl\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        820,
+        -220
+      ],
+      "id": "74c2286d-7ae4-496a-9daa-5da14751cdaa",
+      "name": "Start transcribing file"
+    },
+    {
+      "parameters": {
+        "amount": 9.6
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        980,
+        -220
+      ],
+      "id": "bd340fcf-6ab9-4004-80b4-1a04a22d5bb7",
+      "name": "Wait1",
+      "webhookId": "9ade15c0-ffff-4a4d-a3ec-aeca4f147958"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.assemblyai.com/v2/transcript/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "429dc6ef0bf645c6baaa8fb5d577e79b"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        -220
+      ],
+      "id": "ae44515b-a250-4499-ae20-d65a0aa9b70a",
+      "name": "Get transcription"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.assemblyai.com/v2/upload",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "429dc6ef0bf645c6baaa8fb5d577e79b"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/octet-stream"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        -220
+      ],
+      "id": "d051f02b-e679-4425-ac61-cb74bb91f976",
+      "name": "Upload audio file"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "65019783-d762-4824-acae-788cb626877e",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        820,
+        0
+      ],
+      "id": "5e1feae5-9d1f-434d-ba3f-a4007ca3ba55",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        180
+      ],
+      "id": "03adce94-29ae-488e-97cd-b8787a9295c0",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mFwjEFAf2AvIu8Sn",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        2100,
+        180
+      ],
+      "id": "93981b68-0301-4c25-a929-6b231ec9c1b8",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are J.A.R.V.I.S., Tony Stark’s sophisticated AI assistant. Respond to the following input in J.A.R.V.I.S.’s signature polite, witty, and highly intelligent manner. Ensure your response is articulate, refined, and efficient. Here is the information you need to convey: {{ $json.output }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        2300,
+        0
+      ],
+      "id": "51554549-7cb1-4d39-a2cb-c0264a4062c6",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.2,
+      "position": [
+        2300,
+        180
+      ],
+      "id": "d6d373b9-86a1-4c49-b1cc-649f73d5efb1",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "UjgNLBzLm4lPvpes",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1240,
+        160
+      ],
+      "id": "8c35c47e-b224-4b4b-80a2-79bd3ecaf355",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mFwjEFAf2AvIu8Sn",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        180
+      ],
+      "id": "dfe9de40-3f09-4fc3-bc0a-94cc7c91a930",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "=You are a helpful assistant who responds to user's request in a fun, friendly but professional way. Today's date is {{ $now }}\n\nGuidelines:\n\nQuestions:\n-Whenever there is a question. Can you send it back with the answer, and clearly state that, that is the prompt. \n\nCalculations:\n-Use the Calculator tool for any arithmetic or mathematical queries.\n\nSearching:\n-Use wikipedia to search for information about the prompt.\n\nMemory and Context:\n-Remember to use the memory to maintain context within the current conversation session.\n-If the user switches topics or requests clarification, reset context as needed.\n\nResponse Structure:\n-Keep responses concise and relevant to the user's question.\nProvide additional details if the user asks for elaboration. otherwise stick to direct answers."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1760,
+        0
+      ],
+      "id": "e0a94427-70aa-4b2b-990f-5410dc534826",
+      "name": "J.A.R.V.I.S"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "=vertaal het meegegeven {{ $json.text }} geef als output alleen de vertaling in het engels niks anders"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1400,
+        0
+      ],
+      "id": "b8155ba2-3833-47ea-b734-ea8c9c7cd565",
+      "name": "Translater"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "*"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3b6cc12e-11fb-4962-9aef-aad6852fbf15",
+      "name": "Get message",
+      "webhookId": "80b71cd6-00a3-4410-a0f9-d96c27e3a445",
+      "credentials": {
+        "telegramApi": {
+          "id": "KxuLoQ1mhe2bQMcZ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$('Get message').first().json.message.from.id  }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2280,
+        -180
+      ],
+      "id": "dbfb105a-4468-4571-b988-f1ba12d05ed5",
+      "name": "Send message without J.A.R.V.I.S",
+      "webhookId": "f48c559f-9446-424c-bb2c-fb26e02e76ef",
+      "credentials": {
+        "telegramApi": {
+          "id": "KxuLoQ1mhe2bQMcZ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{$('Get message').first().json.message.from.id  }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2700,
+        -180
+      ],
+      "id": "2a4741fb-440a-4402-acfd-d0840a6e32c2",
+      "name": "Send message with J.A.R.V.I.S",
+      "webhookId": "f48c559f-9446-424c-bb2c-fb26e02e76ef",
+      "credentials": {
+        "telegramApi": {
+          "id": "KxuLoQ1mhe2bQMcZ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{$('Get message').first().json.message.from.id  }}",
+        "binaryData": true,
+        "additionalFields": {
+          "fileName": "data.mpeg"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2980,
+        0
+      ],
+      "id": "a9a54902-95fa-41a4-8464-d8d1031726ec",
+      "name": "Send voice message",
+      "webhookId": "5701ea05-5090-406a-b9d4-8d45fa2230c5",
+      "credentials": {
+        "telegramApi": {
+          "id": "KxuLoQ1mhe2bQMcZ",
+          "name": "Telegram account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.elevenlabs.io/v1/text-to-speech/vYrDCEBLTk7RRbBzh6ap",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "xi-api-key",
+              "value": "sk_438007d894f3be361953e9117f193b13e47d07164b7268e4"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"{{ JSON.stringify($json.text).replace(/(^\\\"|\\\"$)/g, '') }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2700,
+        0
+      ],
+      "id": "94fa7c17-6d30-4f2e-a2e7-12d977723cde",
+      "name": "Make it J.A.R.V.I.S voice",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "2b903487-7391-44d4-b78d-d8e145e8f065",
+        "contextWindowLength": 16
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1860,
+        220
+      ],
+      "id": "9848b64c-0563-4313-86e9-124b79a9bbe0",
+      "name": "Window Buffer Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start transcribing file": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Get transcription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload audio file": {
+      "main": [
+        [
+          {
+            "node": "Start transcribing file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "Upload audio file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get transcription": {
+      "main": [
+        [
+          {
+            "node": "Translater",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Translater",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "J.A.R.V.I.S",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "J.A.R.V.I.S",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Make it J.A.R.V.I.S voice",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send message with J.A.R.V.I.S",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Translater",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "J.A.R.V.I.S",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "J.A.R.V.I.S": {
+      "main": [
+        [
+          {
+            "node": "Send message without J.A.R.V.I.S",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Translater": {
+      "main": [
+        [
+          {
+            "node": "J.A.R.V.I.S",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get message": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message without J.A.R.V.I.S": {
+      "main": [
+        []
+      ]
+    },
+    "Make it J.A.R.V.I.S voice": {
+      "main": [
+        [
+          {
+            "node": "Send voice message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "J.A.R.V.I.S",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "67d9811e-83ea-4b53-81ab-fa5aa5096b9f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "36498366fa588fcaeaf2504eb2f9faf6acbc7438e375ce31d25a9e118872ffec"
+  },
+  "id": "UWNq6cpyLgUuwpiC",
+  "tags": []
+}
