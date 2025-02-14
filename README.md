@@ -59,3 +59,7 @@ The workflow requires the following credentials:
 - Ensure API keys are kept secure.
 - The ElevenLabs integration is disabled by default and must be enabled for voice output.
 - The workflow includes a wait node to allow time for transcriptions to process.
+## Action points
+- Keeping your attention
+- Clear division of tasks
+- Regular progress checks
